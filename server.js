@@ -153,7 +153,7 @@ var cardList =
 ];
 
 require('dotenv').config();
-const url = process.env.MONGODB_URI;
+const url = 'mongodb+srv://em845191:UCFEngr003!@cluster0.3wr8zql.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 const MongoClient = require('mongodb').MongoClient; //you might already have this.
 const client = new MongoClient(url);
 client.connect();
