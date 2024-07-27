@@ -1,8 +1,14 @@
 
 import React, { useState } from 'react';
+import {jwtDecode} from "jwt-decode";
+import {useJwt} from "react-jwt";
+import decode from 'jwt-decode';
 
 function CardUI()
 {
+    //Import build path function
+    var bp = require('./Path.js');
+    
     var card = '';
     var search = '';
 
@@ -15,44 +21,31 @@ function CardUI()
     var userId = ud.id;
     var firstName = ud.firstName;
     var lastName = ud.lastName;
-	
-    const app_name = 'cardsdirectory-7dd5c98a319c'
-    function buildPath(route)
-    {
-        if (process.env.NODE_ENV === 'production') 
-        {
-            return 'https://' + app_name +  '.herokuapp.com/' + route;
-        }
-        else
-        {        
-            return 'http://localhost:5000/' + route;
-        }
-    }
-    
-    
-
+  
     const addCard = async event => 
     {
 	    event.preventDefault();
 
-        var obj = {userId:userId,card:card.value};
+        var storage = require('../tokenStorage.js');
+        var obj = {userId:userId,card:card.value,jwtToken:storage.retrieveToken()};
         var js = JSON.stringify(obj);
 
         try
         {
-            const response = await fetch(buildPath('api/addcard'),
+            const response = await fetch(bp.buildPath('api/addcard'),
             {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
             var txt = await response.text();
             var res = JSON.parse(txt);
 
-            if( res.error.length > 0 )
+            if(res.error && res.error.length > 0 )
             {
                 setMessage( "API Error:" + res.error );
             }
             else
             {
                 setMessage('Card has been added');
+                storage.storeToken(res.jwtToken);
             }
         }
         catch(e)
@@ -65,13 +58,14 @@ function CardUI()
     const searchCard = async event => 
     {
         event.preventDefault();
-        		
-        var obj = {userId:userId,search:search.value};
+        
+        var storage = require('../tokenStorage.js');
+        var obj = {userId:userId,search:search.value,jwtToken:storage.retrieveToken()};
         var js = JSON.stringify(obj);
 
         try
         {
-            const response = await fetch(buildPath('api/searchcards'),
+            const response = await fetch(bp.buildPath('api/searchcards'),
             {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
             var txt = await response.text();
@@ -93,6 +87,7 @@ function CardUI()
         {
             alert(e.toString());
             setResults(e.toString());
+            storage.storeToken(res.jwtToken);
         }
     };
 

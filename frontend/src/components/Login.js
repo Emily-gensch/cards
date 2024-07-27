@@ -1,25 +1,17 @@
 import React, { useState } from 'react';
+import {jwtDecode} from "jwt-decode";
+import decode from "jwt-decode";
+
 
 function Login()
 {
+    //Import build path function
+  var bp = require('./Path.js');
+
   var loginName;
   var loginPassword;
 
   const [message,setMessage] = useState('');
-
-  const app_name = 'cardsdirectory-7dd5c98a319c'
-  function buildPath(route)
-  {
-    if (process.env.NODE_ENV === 'production') 
-    {
-        return 'https://' + app_name +  '.herokuapp.com/' + route;
-    }
-    else
-    {        
-        return 'http://localhost:5000/' + route;
-    }
-}
-
 
   const doLogin = async event => 
     {
@@ -30,22 +22,36 @@ function Login()
 
         try
         {    
-            const response = await fetch(buildPath('api/login'),
+            const response = await fetch(bp.buildPath('api/login'),
                 {method:'POST',body:js,headers:{'Content-Type': 'application/json'}});
 
             var res = JSON.parse(await response.text());
+            const { accessToken } = res;
+            const decoded = jwtDecode(accessToken,{complete:true});
 
-            if( res.id <= 0 )
-            {
-                setMessage('User/Password combination incorrect');
+            try{
+                var ud = decoded;
+                var userId = ud.userId;
+	            var firstName = ud.firstName;
+	            var lastName = ud.lastName;
+      
+                if( userId <= 0 )
+                {
+                    setMessage('User/Password combination incorrect');
+                }
+                else
+                {
+                    var user = {firstName:firstName,lastName:lastName,id:userId}
+                    localStorage.setItem('user_data', JSON.stringify(user));
+
+                    setMessage('');
+                    window.location.href = '/cards';
+                }
             }
-            else
+            catch(e)
             {
-                var user = {firstName:res.firstName,lastName:res.lastName,id:res.id}
-                localStorage.setItem('user_data', JSON.stringify(user));
-
-                setMessage('');
-                window.location.href = '/cards';
+                console.log(e.toString());
+                return("");
             }
         }
         catch(e)
