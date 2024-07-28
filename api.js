@@ -24,7 +24,7 @@ exports.setApp = function ( app, client )
     	console.log(e.message);
   	}
 	
-  	const newCard = {Card:card,UserId:userId};
+  	const newCard = {Card:card,userId:userId};
   	var error = '';
 	
   	try
@@ -97,7 +97,7 @@ exports.setApp = function ( app, client )
 	{
   	// incoming: userId, search
   	// outgoing: results[], error
-	var token = require('./createJWT.js');
+	//var token = require('./createJWT.js');
   	var error = '';
 	
   	const { userId, search, jwtToken } = req.body;
@@ -118,16 +118,16 @@ exports.setApp = function ( app, client )
   	
   	var _search = search.trim();
   	
-  	const db = client.db();
-  	const results = await db.collection('Cards').find({"Card":{$regex:_search+'.*', $options:'r'}}).toArray();
+  	const db = client.db('BaseballCards');
+  	const results = await db.collection('Cards').find({"Card":{$regex:_search+'.*', $options:'i'}}).toArray();
   	
-  	/*var _ret = [];
+  	var _ret = [];
   	for( var i=0; i<results.length; i++ )
   	{
     	_ret.push( results[i].Card );
   	}
-  	*/
-	  var _ret = results.map(result => result.Card);
+  	
+	//var _ret = results.map(result => result.Card);
   	var refreshedToken = null;
   	try
   	{
